@@ -111,7 +111,7 @@ namespace Leosac.SharedServices
             return Path.Combine(path, fileName);
         }
 
-        private static bool IsPerUserRunningApplication()
+        public static bool IsPerUserRunningApplication()
         {
             var exe = Assembly.GetEntryAssembly()?.Location;
             return !string.IsNullOrEmpty(exe)
