@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageId>Leosac.$(AssemblyName)</PackageId>
+    <Version>1.0.0</Version>
+    <Product>Leosac Shared Services Library</Product>
+    <Description>C# Library for shared Leosac services.</Description>
+    <Company>Leosac SAS</Company>
+    <Authors>leosac</Authors>
+    <AssemblyTitle>Leosac WpfApp</AssemblyTitle>
+    <Copyright>Copyright © Leosac 2024</Copyright>
+    <PackageProjectUrl>https://github.com/leosac/shared-services</PackageProjectUrl>
+    <RepositoryType>git</RepositoryType>
+    <RepositoryUrl>https://github.com/leosac/shared-services.git</RepositoryUrl>
+    <PackageTags>leosac dotnet shared services library</PackageTags>
+    <PackageLicenseExpression>LGPL-3.0-only</PackageLicenseExpression>
+    <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
+    <RootNamespace>Leosac.$(MSBuildProjectName.Replace(" ", "_"))</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
+    <PackageReference Include="log4net" Version="2.0.17" />
+    <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+  </ItemGroup>
+
+</Project>
