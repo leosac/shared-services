@@ -30,43 +30,75 @@ namespace Leosac.SharedServices
             return string.Format("{0}.json", typeof(T).Name);
         }
 
+        [JsonIgnore]
         public bool IsUserConfiguration { get; protected set; }
+
+        [JsonIgnore]
+        public bool FallbackToUserConfiguration { get; protected set; }
 
         public virtual void SaveToFile()
         {
-            SaveToFile(GetConfigFilePath(true));
-        }
-
-        public void SaveToFile(string filePath)
-        {
-            log.Info("Saving configuration to file...");
-            using var file = File.CreateText(filePath);
-            using var writer = new JsonTextWriter(file);
-            _serializer.Serialize(writer, this);
-            log.Info("Configuration saved.");
-        }
-
-        public static T? LoadFromFile(bool isUserConfiguration)
-        {
-            return LoadFromFile(GetConfigFilePath(GetDefaultFileName(), isUserConfiguration));
-        }
-
-        public static T? LoadFromFile(string filePath)
-        {
-            log.Info("Loading configuration from file...");
-            if (File.Exists(filePath))
+            var paths = new List<string>
             {
-                using var file = File.OpenText(filePath);
-                using var reader = new JsonTextReader(file);
-                var config = _serializer.Deserialize<T>(reader);
-                log.Info("Configuration loaded from file.");
-                return config;
-            }
-            else
+                GetConfigFilePath(true, IsUserConfiguration)
+            };
+            if (!IsUserConfiguration && FallbackToUserConfiguration)
             {
-                log.Info("No file found, falling back to default instance.");
-                return new T();
+                paths.Add(GetConfigFilePath(true, true));
             }
+            SaveToFile([.. paths]);
+        }
+
+        public bool SaveToFile(params string[] filePaths)
+        {
+            bool saved = false;
+            for (int i = 0; i < filePaths.Length && !saved; ++i)
+            {
+                try
+                {
+                    log.Info(string.Format("Saving configuration to file {0}...", filePaths[0]));
+                    using var file = File.CreateText(filePaths[i]);
+                    using var writer = new JsonTextWriter(file);
+                    _serializer.Serialize(writer, this);
+                    log.Info("Configuration saved.");
+                    saved = true;
+                }
+                catch(Exception ex)
+                {
+                    log.Error(string.Format("Cannot save to file {0}.", filePaths[i]), ex);
+                }
+            }
+            return saved;
+        }
+
+        public static T? LoadFromFile(bool isUserConfiguration, bool fallbackToUserConfiguration = false)
+        {
+            var paths = new List<string>();
+            if (!isUserConfiguration && fallbackToUserConfiguration)
+            {
+                paths.Add(GetConfigFilePath(GetDefaultFileName(), true));
+            }
+            paths.Add(GetConfigFilePath(GetDefaultFileName(), isUserConfiguration));
+            return LoadFromFile([..paths]);
+        }
+
+        public static T? LoadFromFile(params string[] filePaths)
+        {
+            foreach (var filePath in filePaths)
+            {
+                log.Info(string.Format("Loading configuration from file {0}...", filePath));
+                if (File.Exists(filePath))
+                {
+                    using var file = File.OpenText(filePath);
+                    using var reader = new JsonTextReader(file);
+                    var config = _serializer.Deserialize<T>(reader);
+                    log.Info("Configuration loaded from file.");
+                    return config;
+                }
+            }
+
+            log.Info("No file found, falling back to default instance.");
+            return new T();
         }
 
         public string GetConfigFilePath()
@@ -77,6 +109,11 @@ namespace Leosac.SharedServices
         public string GetConfigFilePath(bool createFolders)
         {
             return GetConfigFilePath(GetDefaultFileName(), createFolders, IsUserConfiguration);
+        }
+
+        public string GetConfigFilePath(bool createFolders, bool isUserConfiguration)
+        {
+            return GetConfigFilePath(GetDefaultFileName(), createFolders, isUserConfiguration);
         }
 
         public static string GetConfigFilePath(string fileName, bool isUserConfiguration)
@@ -93,8 +130,8 @@ namespace Leosac.SharedServices
             }
             else
             {
-                var perUserInstalation = LeosacAppInfo.Instance?.PerUserInstallation ?? IsPerUserRunningApplication();
-                var appData = (perUserInstalation || isUserConfiguration) ? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) : Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
+                var perUserInstallation = LeosacAppInfo.Instance?.PerUserInstallation ?? IsPerUserRunningApplication();
+                var appData = (perUserInstallation || isUserConfiguration) ? Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) : Environment.GetFolderPath(Environment.SpecialFolder.CommonApplicationData);
                 path = Path.Combine(appData, "Leosac");
                 if (!Directory.Exists(path) && createFolders)
                 {
