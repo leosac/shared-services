@@ -69,10 +69,14 @@ namespace Leosac.SharedServices
             PlanUpdated?.Invoke(this, new EventArgs());
         }
 
-        public override void SaveToFile()
+        public override bool SaveToFile()
         {
-            base.SaveToFile();
-            OnPlanUpdated();
+            var saved = base.SaveToFile();
+            if (saved)
+            {
+                OnPlanUpdated();
+            }
+            return saved;
         }
 
         public bool IsActivePlan()
@@ -270,7 +274,11 @@ namespace Leosac.SharedServices
                 // Be sure to save the InstallationId
                 if (!File.Exists(settings.GetConfigFilePath()))
                 {
-                    settings.SaveToFile();
+                    if (!settings.SaveToFile())
+                    {
+                        // Better to stop here than register a plan which will not be valid after application restart...
+                        throw new Exception("Cannot save the global application settings cache.");
+                    }
                 }
                 uuid = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", settings.InstallationId, Environment.MachineName))));
             }
