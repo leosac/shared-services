@@ -36,7 +36,7 @@ namespace Leosac.SharedServices
         [JsonIgnore]
         public bool FallbackToUserConfiguration { get; protected set; }
 
-        public virtual void SaveToFile()
+        public virtual bool SaveToFile()
         {
             var paths = new List<string>
             {
@@ -46,7 +46,7 @@ namespace Leosac.SharedServices
             {
                 paths.Add(GetConfigFilePath(true, true));
             }
-            SaveToFile([.. paths]);
+            return SaveToFile([.. paths]);
         }
 
         public bool SaveToFile(params string[] filePaths)
