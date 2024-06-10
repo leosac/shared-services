@@ -170,16 +170,23 @@ namespace Leosac.SharedServices
             else
             {
                 LicenseKey = licenseKey;
-                if (ParseCode(code))
+                try
                 {
-                    SaveToFile();
+                    if (ParseCode(code))
+                    {
+                        SaveToFile();
+                    }
+                    else
+                    {
+                        var error = "Invalid verification code.";
+                        log.Error(error);
+                        throw new MaintenanceException(error);
+                    }
                 }
-                else
+                catch
                 {
                     LicenseKey = oldKey;
-                    var error = "Invalid verification code.";
-                    log.Error(error);
-                    throw new MaintenanceException(error);
+                    throw;
                 }
             }
         }
