@@ -292,12 +292,15 @@ namespace Leosac.SharedServices
                         throw new Exception("Cannot save the global application settings cache.");
                     }
                 }
+
+
+                var deviceId = new DeviceIdBuilder()
+                    .OnWindows(windows => windows.AddWindowsDeviceId())
+                    .ToString();
+
                 byte[] uuidData;
-                if (version == LATEST_VERSION)
+                if (version == LATEST_VERSION && !string.IsNullOrEmpty(deviceId))
                 {
-                    var deviceId = new DeviceIdBuilder()
-                        .OnWindows(windows => windows.AddWindowsDeviceId())
-                        .ToString();
                     uuidData = MD5.HashData(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", settings.InstallationId, deviceId)));
                 }
                 else
