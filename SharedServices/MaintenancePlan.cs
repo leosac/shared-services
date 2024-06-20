@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using DeviceId;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Diagnostics;
@@ -21,6 +22,7 @@ namespace Leosac.SharedServices
     /// </remarks>
     public class MaintenancePlan : PermanentConfig<MaintenancePlan>
     {
+        const int LATEST_VERSION = 2;
         const string BASE_URL = "https://leosac.com/";
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType);
@@ -53,6 +55,8 @@ namespace Leosac.SharedServices
                 return _singleton!;
             }
         }
+
+        public int Version { get; set; }
 
         public string? LicenseKey { get; set; }
 
@@ -161,6 +165,7 @@ namespace Leosac.SharedServices
                 var msg = (string?)(data?["message"]);
                 log.Info(string.Format("Registration succeeded with message: {0}.", msg));
 
+                Version = LATEST_VERSION;
                 LicenseKey = licenseKey;
                 ExpirationDate = expire;
                 Code = ComputeCode();
@@ -193,10 +198,10 @@ namespace Leosac.SharedServices
 
         public string? ComputeCode()
         {
-            return ComputeCode(null);
+            return ComputeCode(LATEST_VERSION, null);
         }
 
-        public string? ComputeCode(string? uuid)
+        public string? ComputeCode(int version, string? uuid)
         {
             if (!string.IsNullOrEmpty(LicenseKey))
             {
@@ -222,7 +227,7 @@ namespace Leosac.SharedServices
         {
             if (!string.IsNullOrEmpty(code))
             {
-                var key = GetUUIDKey();
+                var key = GetUUIDKey(Version);
                 if (key != null)
                 {
                     var aes = Aes.Create();
@@ -249,16 +254,16 @@ namespace Leosac.SharedServices
             return false;
         }
 
-        private static byte[]? GetUUIDKey()
+        private static byte[]? GetUUIDKey(int version = LATEST_VERSION)
         {
-            return GetUUIDKey(null);
+            return GetUUIDKey(null, version);
         }
 
-        private static byte[]? GetUUIDKey(string? uuid)
+        private static byte[]? GetUUIDKey(string? uuid, int version = LATEST_VERSION)
         {
             if (string.IsNullOrEmpty(uuid))
             {
-                uuid = GetUUID();
+                uuid = GetUUID(version);
             }
 
             if (!string.IsNullOrEmpty(uuid))
@@ -272,7 +277,7 @@ namespace Leosac.SharedServices
             return null;
         }
 
-        public static string? GetUUID()
+        public static string? GetUUID(int version = LATEST_VERSION)
         {
             string? uuid = null;
             var settings = AppSettings.GetSingletonInstance();
@@ -287,7 +292,19 @@ namespace Leosac.SharedServices
                         throw new Exception("Cannot save the global application settings cache.");
                     }
                 }
-                uuid = Convert.ToHexString(MD5.HashData(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", settings.InstallationId, Environment.MachineName))));
+                byte[] uuidData;
+                if (version == LATEST_VERSION)
+                {
+                    var deviceId = new DeviceIdBuilder()
+                        .OnWindows(windows => windows.AddWindowsDeviceId())
+                        .ToString();
+                    uuidData = MD5.HashData(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", settings.InstallationId, deviceId)));
+                }
+                else
+                {
+                    uuidData = MD5.HashData(Encoding.UTF8.GetBytes(string.Format("{0}:{1}", settings.InstallationId, Environment.MachineName)));
+                }
+                uuid = Convert.ToHexString(uuidData);
             }
             return uuid;
         }
