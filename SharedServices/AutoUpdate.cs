@@ -16,12 +16,12 @@ namespace Leosac.SharedServices
         private bool _hasUpdate;
         private UpdateVersion? _updateVersion;
 
-        public bool CheckUpdate()
+        public Task<bool> CheckUpdate()
         {
             return CheckUpdate(LeosacAppInfo.Instance?.ApplicationCode);
         }
 
-        public bool CheckUpdate(string? applicationCode)
+        public async Task<bool> CheckUpdate(string? applicationCode)
         {
             log.Info("Checking for software update...");
 
@@ -32,9 +32,9 @@ namespace Leosac.SharedServices
                 {
                     throw new MaintenanceException("Application Code is required to check for updates.");
                 }
-                using var response = client.GetAsync(string.Format("https://download.leosac.com/{0}/latestversion", applicationCode)).Result;
+                using var response = await client.GetAsync(string.Format("https://download.leosac.com/{0}/latestversion", applicationCode));
                 using var content = response.Content;
-                var json = content.ReadAsStringAsync().Result;
+                var json = await content.ReadAsStringAsync();
                 UpdateVersion = JsonConvert.DeserializeObject<UpdateVersion>(json);
 
                 if (UpdateVersion != null)

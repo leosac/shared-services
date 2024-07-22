@@ -175,6 +175,7 @@ namespace Leosac.SharedServices
             else
             {
                 LicenseKey = licenseKey;
+                Version = LATEST_VERSION;
                 try
                 {
                     if (ParseCode(code))
