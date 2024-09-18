@@ -226,9 +226,14 @@ namespace Leosac.SharedServices
 
         public bool ParseCode(string? code)
         {
+            return ParseCode(null, code);
+        }
+
+        public bool ParseCode(string? uuid, string? code)
+        {
             if (!string.IsNullOrEmpty(code))
             {
-                var key = GetUUIDKey(Version);
+                var key = GetUUIDKey(uuid, Version);
                 if (key != null)
                 {
                     var aes = Aes.Create();
