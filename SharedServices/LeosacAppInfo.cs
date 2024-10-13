@@ -9,8 +9,21 @@ namespace Leosac.SharedServices
 
         protected LeosacAppInfo()
         {
-            var fvi = FileVersionInfo.GetVersionInfo(Assembly.GetEntryAssembly()!.Location);
-            ApplicationName = ApplicationTitle = fvi.ProductName ?? "Leosac Application";
+            var location = Assembly.GetEntryAssembly()?.Location;
+            ApplicationName = "Leosac Application";
+            if (!string.IsNullOrEmpty(location))
+            {
+                try
+                {
+                    var fvi = FileVersionInfo.GetVersionInfo(location);
+                    if (!string.IsNullOrEmpty(fvi.ProductName))
+                    {
+                        ApplicationName = fvi.ProductName;
+                    }
+                }
+                catch { }
+            }
+            ApplicationTitle = ApplicationName;
             CheckPlan = true;
             PerUserInstallation = true;
             ApplicationUrl = "https://leosac.com";
