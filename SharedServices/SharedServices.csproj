@@ -6,13 +6,13 @@
     <Nullable>enable</Nullable>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     <PackageId>Leosac.$(AssemblyName)</PackageId>
-    <Version>1.7.0</Version>
+    <Version>1.8.0</Version>
     <Product>Leosac Shared Services Library</Product>
     <Description>C# Library for shared Leosac services.</Description>
     <Company>Leosac SAS</Company>
     <Authors>leosac</Authors>
     <AssemblyTitle>Leosac WpfApp</AssemblyTitle>
-    <Copyright>Copyright © Leosac 2024</Copyright>
+    <Copyright>Copyright © Leosac 2025</Copyright>
     <PackageProjectUrl>https://github.com/leosac/shared-services</PackageProjectUrl>
     <RepositoryType>git</RepositoryType>
     <RepositoryUrl>https://github.com/leosac/shared-services.git</RepositoryUrl>
@@ -23,9 +23,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.2.2" />
-    <PackageReference Include="DeviceId" Version="6.7.0" />
-    <PackageReference Include="DeviceId.Windows" Version="6.6.0" />
+    <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.0" />
+    <PackageReference Include="DeviceId" Version="6.8.0" />
+    <PackageReference Include="DeviceId.Windows" Version="6.8.0" />
     <PackageReference Include="log4net" Version="2.0.17" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
   </ItemGroup>
