@@ -68,6 +68,9 @@ namespace Leosac.SharedServices
         [JsonIgnore]
         public EventHandler? PlanUpdated { get; set; }
 
+        [JsonIgnore]
+        public static string[]? AllowedProductCodes { get; set; }
+
         public void OnPlanUpdated()
         {
             PlanUpdated?.Invoke(this, new EventArgs());
@@ -247,7 +250,14 @@ namespace Leosac.SharedServices
                         {
                             ExpirationDate = !string.IsNullOrEmpty(fragments[2]) ? DateTime.ParseExact(fragments[2], "MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : null;
                             Code = code;
-                            return true;
+                            if (IsAllowedProductCode(LicenseKey))
+                            {
+                                return true;
+                            }
+                            else
+                            {
+                                LicenseKey = null;
+                            }
                         }
                         else
                         {
@@ -258,6 +268,31 @@ namespace Leosac.SharedServices
             }
 
             return false;
+        }
+
+        public string? GetProductCode()
+        {
+            return GetProductCode(LicenseKey);
+        }
+
+        public static string? GetProductCode(string? licenseKey)
+        {
+            if (string.IsNullOrEmpty(licenseKey))
+                return null;
+
+            return licenseKey.Split("-")[0];
+        }
+
+        private static bool IsAllowedProductCode(string licenseKey)
+        {
+            if (string.IsNullOrEmpty(licenseKey))
+                return false;
+
+            if (AllowedProductCodes == null || AllowedProductCodes.Length == 0)
+                return true;
+
+            var code = GetProductCode(licenseKey);
+            return AllowedProductCodes.Contains(code);
         }
 
         private static byte[]? GetUUIDKey(int version = LATEST_VERSION)
