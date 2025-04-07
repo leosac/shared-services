@@ -152,6 +152,10 @@ namespace Leosac.SharedServices
             var oldKey = LicenseKey;
             if (string.IsNullOrEmpty(code))
             {
+                if (!IsAllowedProductCode(licenseKey))
+                {
+                    throw new MaintenanceException("The key is not expected for this product.");
+                }
                 var fragments = licenseKey.Split('-');
                 var data = QueryData(string.Format("{0}?wc-api=serial-numbers-api&request=check&product_id={1}&serial_key={2}", BASE_URL, fragments[0], licenseKey));
                 DateTime? expire = null;
