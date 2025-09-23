@@ -22,7 +22,7 @@ namespace Leosac.SharedServices
     /// </remarks>
     public class MaintenancePlan : PermanentConfig<MaintenancePlan>
     {
-        const int LATEST_VERSION = 2;
+        const int LATEST_VERSION = 3;
         const string BASE_URL = "https://leosac.com/";
 
         private static readonly log4net.ILog log = log4net.LogManager.GetLogger(System.Reflection.MethodBase.GetCurrentMethod()?.DeclaringType);
@@ -64,6 +64,8 @@ namespace Leosac.SharedServices
         public DateTime? ExpirationDate { get; set; }
 
         public string? Code { get; set; }
+
+        public int? Limit { get; set; }
 
         [JsonIgnore]
         public EventHandler? PlanUpdated { get; set; }
@@ -167,6 +169,11 @@ namespace Leosac.SharedServices
                         expire = DateTime.Parse(strexpire);
                     }
                 }
+                int? limit = null;
+                if (data?["limit"] != null)
+                {
+                    limit = (int?)data?["limit"];
+                }
                 data = QueryData(string.Format("{0}?wc-api=serial-numbers-api&request=activate&product_id={1}&serial_key={2}&instance={3}&email={4}&platform={5}", BASE_URL, fragments[0], licenseKey, GetUUID(), HttpUtility.UrlEncode(email), Environment.OSVersion), new[] { "instance_already_activated" });
 
                 var msg = (string?)(data?["message"]);
@@ -175,6 +182,7 @@ namespace Leosac.SharedServices
                 Version = LATEST_VERSION;
                 LicenseKey = licenseKey;
                 ExpirationDate = expire;
+                Limit = limit;
                 Code = ComputeCode();
 
                 SaveToFile();
@@ -218,13 +226,18 @@ namespace Leosac.SharedServices
                 {
                     expiration = ExpirationDate.Value.ToString("MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture);
                 }
-                var key = GetUUIDKey(uuid);
+                var key = GetUUIDKey(uuid, version);
                 if (key != null)
                 {
                     var aes = Aes.Create();
                     var iv = new byte[16];
                     aes.Key = key;
-                    return Convert.ToHexString(aes.EncryptCbc(Encoding.UTF8.GetBytes(String.Format("LEO:{0}:{1}", LicenseKey, expiration)), iv));
+                    var input = string.Format("LEO:{0}:{1}", LicenseKey, expiration);
+                    if (version >= 3)
+                    {
+                        input += string.Format(":{0}", Limit?.ToString() ?? string.Empty);
+                    }
+                    return Convert.ToHexString(aes.EncryptCbc(Encoding.UTF8.GetBytes(input), iv));
                 }
             }
 
@@ -248,12 +261,21 @@ namespace Leosac.SharedServices
                     aes.Key = key;
                     var chain = Encoding.UTF8.GetString(aes.DecryptCbc(Convert.FromHexString(code), iv));
                     var fragments = chain.Split(':');
-                    if (fragments.Length == 3 && fragments[0] == "LEO")
+                    if (fragments.Length >= 3 && fragments[0] == "LEO")
                     {
                         if (LicenseKey == fragments[1])
                         {
                             ExpirationDate = !string.IsNullOrEmpty(fragments[2]) ? DateTime.ParseExact(fragments[2], "MM/dd/yyyy", System.Globalization.CultureInfo.InvariantCulture) : null;
                             Code = code;
+                            if (fragments.Length >= 4 && Version >= 3)
+                            {
+                                Limit = !string.IsNullOrEmpty(fragments[3]) ? int.Parse(fragments[3]) : null;
+                            }
+                            else
+                            {
+                                Limit = null;
+                            }
+
                             if (IsAllowedProductCode(LicenseKey))
                             {
                                 return true;
