@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    tools {
+        dotnet 'dotnet8'
+    }
 	stages {
         stage('Pre-Build') {
             steps {
