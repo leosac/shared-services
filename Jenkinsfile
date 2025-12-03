@@ -21,7 +21,7 @@ pipeline {
             steps {
                 withSonarQubeEnv('SonarQube Community') {
                     dotnetBuild()
-                    waitForQualityGate()
+                    waitForQualityGate abortPipeline: true
                 }
             }
             when {
