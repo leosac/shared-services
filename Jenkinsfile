@@ -17,22 +17,11 @@ pipeline {
                 dotnetBuild()
             }
         }
-        stage('Sonar Analysis') {
+        stage('Sonar') {
             steps {
                 withSonarQubeEnv('SonarQube Community') {
                     dotnetBuild()
                 }
-            }
-            when {
-                anyOf {
-                    branch 'main'
-                    buildingTag()
-                    changeRequest()
-                }
-            }
-        }
-        stage('Sonar Quality Gate') {
-            steps {
                 timeout(time: 1, unit: 'HOURS') {
                     waitForQualityGate(abortPipeline: true)
                 }
