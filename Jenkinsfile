@@ -41,7 +41,7 @@ pipeline {
         }
         stage('Test') {
             steps {
-                dotnetTest()
+                dotnetTest(logger: 'trx')
                 mstest testResultsFile:"**/*.trx", keepLongStdio: true
             }
         }
