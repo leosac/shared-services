@@ -18,8 +18,10 @@ pipeline {
             }
         }
         stage('Sonar') {
+            environment {
+                scannerHome = tool 'SonarScanner for MSBuild'
+            }
             steps {
-                def scannerHome = tool 'SonarScanner for MSBuild'
                 withSonarQubeEnv('SonarQube Community') {
                     sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll begin"
                     dotnetBuild()
