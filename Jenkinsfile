@@ -17,6 +17,11 @@ pipeline {
                 dotnetBuild()
             }
         }
+        stage('Test') {
+            steps {
+                dotnetTest()
+            }
+        }
         stage('Sonar') {
             environment {
                 scannerHome = tool 'SonarScanner for MSBuild'
