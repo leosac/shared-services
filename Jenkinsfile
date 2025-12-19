@@ -19,8 +19,11 @@ pipeline {
         }
         stage('Sonar') {
             steps {
+                def scannerHome = tool 'SonarScanner for MSBuild'
                 withSonarQubeEnv('SonarQube Community') {
+                    sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll begin"
                     dotnetBuild()
+                    sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll end"
                 }
                 timeout(time: 1, unit: 'HOURS') {
                     waitForQualityGate(abortPipeline: true)
