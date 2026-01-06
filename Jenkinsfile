@@ -23,7 +23,7 @@ pipeline {
             }
             steps {
                 withSonarQubeEnv('SonarQube Community') {
-                    sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll begin /k:'leosac_shared-services_c6e04130-a79b-4220-8539-6115f367bcd4'"
+                    sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll begin /k:'leosac_shared-services_f283ea9d-4131-4d41-ba9a-6e29632e5898'"
                     dotnetBuild()
                     sh "dotnet ${scannerHome}/SonarScanner.MSBuild.dll end"
                 }
