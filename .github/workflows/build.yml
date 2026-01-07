@@ -31,4 +31,5 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
     - uses: actions/upload-artifact@v6
       with:
+        name: ${{github.event.repository.name}} NuGet
         path: ${{ github.workspace }}/**/bin/Release/*.nupkg
