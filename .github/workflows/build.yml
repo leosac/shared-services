@@ -31,4 +31,4 @@ jobs:
       run: dotnet test --no-restore --verbosity normal
     - uses: actions/upload-artifact@v6
       with:
-        path: **/bin/Release/*.nupkg
+        path: ${{ github.workspace }}/**/bin/Release/*.nupkg
