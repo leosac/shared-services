@@ -4,7 +4,8 @@ pipeline {
         DOTNET_SYSTEM_GLOBALIZATION_INVARIANT = 1
     }
     tools {
-        dotnetsdk 'dotnet10'
+        dotnetsdk 'dotnet8'
+		dotnetsdk 'dotnet10'
     }
 	stages {
         stage('Pre-Build') {
